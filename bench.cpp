@@ -25,7 +25,7 @@ void run_benchmarks(int n, int m, double epsilon, int num_tries) {
     vector<double> lpt_approx, multifit_approx, ptas_approx;
     double lpt_makespan = 0, multifit_makespan = 0, ptas_makespan = 0, brute_makespan = 0;
     while (num_tries--) {
-        std::vector<int> jobs = generate_jobs(n, 100);
+        std::vector<int> jobs = generate_jobs(n, 1000);
         cout << "Jobs: ";
         for (auto j : jobs) {
             cout << j << ' ';
@@ -75,22 +75,22 @@ void run_benchmarks(int n, int m, double epsilon, int num_tries) {
     };
 
     std::cout << "Benchmark results for num_jobs=" << n << ", num_machines=" << m << ", epsilon=" << epsilon << ":\n";
-    std::cout << "LPT average time: " << average_time(lpt_times) << " avg approximation: " << average_approximation(lpt_approx) << std::endl;
-    std::cout << "Multifit average time: " << average_time(multifit_times) << " avg approximation: " << average_approximation(multifit_approx) << std::endl;
-    std::cout << "PTAS average time: " << average_time(ptas_times) << " avg approximation: " << average_approximation(ptas_approx) << std::endl;
+    std::cout << "LPT average time: " << average_time(lpt_times) << " avg approximation: " << average_approximation(lpt_approx) << " max approximation: " << *std::max_element(lpt_approx.begin(), lpt_approx.end()) << std::endl;
+    std::cout << "Multifit average time: " << average_time(multifit_times) << " avg approximation: " << average_approximation(multifit_approx) << " max approximation: " << *std::max_element(multifit_approx.begin(), multifit_approx.end()) << std::endl;
+    std::cout << "PTAS average time: " << average_time(ptas_times) << " avg approximation: " << average_approximation(ptas_approx) << " max approximation: " << *std::max_element(ptas_approx.begin(), ptas_approx.end()) << std::endl;
     std::cout << "Brute-force average time: " << average_time(brute_times) << std::endl
               << std::endl;
 }
 
 int main() {
     // std::vector<int> job_counts = {1000, 10000, 100000, 1000000, 10000000};
-    std::vector<int> job_counts = {2, 4, 8, 16, 32, 64};
+    std::vector<int> job_counts = {10};
     std::vector<int> machine_counts = {4};
-    double epsilon = 0.25;
+    double epsilon = 0.1;
 
     for (int n : job_counts) {
         for (int m : machine_counts) {
-            run_benchmarks(n, m, epsilon, 5);
+            run_benchmarks(n, m, epsilon, 100);
         }
     }
     return 0;
