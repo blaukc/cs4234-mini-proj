@@ -239,19 +239,19 @@ double PTAS(std::vector<int> jobs, int m, double epsilon) {
         actual_job_alloc[index].push_back(t);
     }
 
-    // for (int i = 0; i < m; i++) {
-    //     std::cout << "machine " << i << ": ";
-    //     for (auto j : actual_job_alloc[i]) {
-    //         std::cout << j << ' ';
-    //     }
-    //     std::cout << std::endl;
-    // }
+    for (int i = 0; i < m; i++) {
+        std::cout << "machine " << i << ": ";
+        for (auto j : actual_job_alloc[i]) {
+            std::cout << j << ' ';
+        }
+        std::cout << std::endl;
+    }
 
-    // std::cout << "makespans: ";
-    // for (auto i : makespans) {
-    //     std::cout << i << ' ';
-    // }
-    // std::cout << std::endl;
+    std::cout << "makespans: ";
+    for (auto i : makespans) {
+        std::cout << i << ' ';
+    }
+    std::cout << std::endl;
 
     auto max_it = std::max_element(makespans.begin(), makespans.end());
     return max_it != makespans.end() ? *max_it : 0;

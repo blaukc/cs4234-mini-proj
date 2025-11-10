@@ -25,13 +25,12 @@ void run_benchmarks(int n, int m, double epsilon, int num_tries) {
     vector<double> lpt_approx, multifit_approx, ptas_approx;
     double lpt_makespan = 0, multifit_makespan = 0, ptas_makespan = 0, brute_makespan = 0;
     while (num_tries--) {
-        std::vector<int> jobs = {7, 7, 6, 6, 5, 5, 4, 4, 4};
-        n = 9;
-        // cout << "Jobs: ";
-        // for (auto j : jobs) {
-        //     cout << j << ' ';
-        // }
-        // cout << endl;
+        std::vector<int> jobs = generate_jobs(n, 100);
+        cout << "Jobs: ";
+        for (auto j : jobs) {
+            cout << j << ' ';
+        }
+        cout << endl;
 
         auto brute_start = std::chrono::high_resolution_clock::now();
         brute_makespan = brute(n, jobs, m);
