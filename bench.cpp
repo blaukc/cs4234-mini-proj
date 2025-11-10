@@ -25,7 +25,7 @@ void run_benchmarks(int n, int m, double epsilon, int num_tries) {
     vector<double> lpt_approx, multifit_approx, ptas_approx;
     double lpt_makespan = 0, multifit_makespan = 0, ptas_makespan = 0, brute_makespan = 0;
     while (num_tries--) {
-        std::vector<int> jobs = generate_jobs(n, 1000);
+        std::vector<int> jobs = generate_jobs(n, 10000);
         cout << "Jobs: ";
         for (auto j : jobs) {
             cout << j << ' ';
@@ -74,10 +74,18 @@ void run_benchmarks(int n, int m, double epsilon, int num_tries) {
         return t / approximations.size();
     };
 
+    auto std_dev_approximation = [](const vector<double>& approximations, double mean) {
+        double sum = 0.0;
+        for (const auto& a : approximations) {
+            sum += (a - mean) * (a - mean);
+        }
+        return std::sqrt(sum / approximations.size());
+    };
+
     std::cout << "Benchmark results for num_jobs=" << n << ", num_machines=" << m << ", epsilon=" << epsilon << ":\n";
-    std::cout << "LPT average time: " << average_time(lpt_times) << " avg approximation: " << average_approximation(lpt_approx) << " max approximation: " << *std::max_element(lpt_approx.begin(), lpt_approx.end()) << std::endl;
-    std::cout << "Multifit average time: " << average_time(multifit_times) << " avg approximation: " << average_approximation(multifit_approx) << " max approximation: " << *std::max_element(multifit_approx.begin(), multifit_approx.end()) << std::endl;
-    std::cout << "PTAS average time: " << average_time(ptas_times) << " avg approximation: " << average_approximation(ptas_approx) << " max approximation: " << *std::max_element(ptas_approx.begin(), ptas_approx.end()) << std::endl;
+    std::cout << "LPT average time: " << average_time(lpt_times) << " avg approximation: " << average_approximation(lpt_approx) << " max approximation: " << *std::max_element(lpt_approx.begin(), lpt_approx.end()) << " std dev: " << std_dev_approximation(lpt_approx, average_approximation(lpt_approx)) << std::endl;
+    std::cout << "Multifit average time: " << average_time(multifit_times) << " avg approximation: " << average_approximation(multifit_approx) << " max approximation: " << *std::max_element(multifit_approx.begin(), multifit_approx.end()) << " std dev: " << std_dev_approximation(multifit_approx, average_approximation(multifit_approx)) << std::endl;
+    std::cout << "PTAS average time: " << average_time(ptas_times) << " avg approximation: " << average_approximation(ptas_approx) << " max approximation: " << *std::max_element(ptas_approx.begin(), ptas_approx.end()) << " std dev: " << std_dev_approximation(ptas_approx, average_approximation(ptas_approx)) << std::endl;
     std::cout << "Brute-force average time: " << average_time(brute_times) << std::endl
               << std::endl;
 }

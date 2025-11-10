@@ -1,11 +1,9 @@
 // Written by Jie Xiang
-
 #include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <iterator>
 #include <limits>
-#include <numeric>
 #include <unordered_map>
 #include <vector>
 
@@ -80,6 +78,7 @@ int DP(std::unordered_map<std::vector<int>, int, vector_hash>& table, const std:
     for (auto& conf : confs) {
         min_val = std::min(min_val, DP(table, vector_diff(bin_count, conf), epsilon, T));
     }
+
     table.insert({bin_count, 1 + min_val});
 
     return 1 + min_val;
@@ -142,7 +141,7 @@ double PTAS(std::vector<int> jobs, int m, double epsilon) {
     table[std::vector<int>(s, 0)] = 0;                               // base case: 0 jobs can be done with 0 machines
 
     while (lower < upper) {
-        T = (upper + lower) / 2;
+        T = lower + (upper - lower) / 2;
         small_jobs.clear();
         large_jobs.clear();
 
@@ -153,8 +152,6 @@ double PTAS(std::vector<int> jobs, int m, double epsilon) {
                 small_jobs.push_back(t);
             }
         }
-
-        std::vector<int> large_rounded{};
 
         // we need s bins to cover the interval (epsilon*T, T]
         double width = (1.0 - epsilon) * T / s;  // bin width
@@ -173,8 +170,6 @@ double PTAS(std::vector<int> jobs, int m, double epsilon) {
             } else {
                 bin_count[quotient - 1]++;
             }
-
-            large_rounded.push_back(rounded);
         }
 
         table.clear();
@@ -188,12 +183,36 @@ double PTAS(std::vector<int> jobs, int m, double epsilon) {
         }
     }
 
+    // lower is the first bin size that requires m machines
+    // rerun DP on T = lower since binary search may have ran DP outside range
+    T = lower;
+    double width = (1.0 - epsilon) * T / s;  // bin width
+    std::fill(bin_count.begin(), bin_count.end(), 0);
+
+    // rounding up to nearest bin
+    for (int t : large_jobs) {
+        double offset = t - epsilon * T;
+        int quotient = offset / width;
+        double rem = offset - quotient * width;
+        double rounded = epsilon * T + quotient * width;
+
+        if (rem > 0) {
+            rounded += width;
+            bin_count[quotient]++;
+        } else {
+            bin_count[quotient - 1]++;
+        }
+    }
+
+    table.clear();
+    table[std::vector<int>(s, 0)] = 0;  // base case: 0 jobs can be done with 0 machines
+    DP(table, bin_count, epsilon, T);
+
     std::vector<std::vector<int>> job_alloc_rounded = get_DP_alloc(table, bin_count, epsilon, T);
 
     // fit actual jobs into rounded bins
     std::vector<std::vector<int>> actual_job_alloc(m, std::vector<int>());
     std::vector<int> makespans(m, 0);
-    double width = (1.0 - epsilon) * T / s;  // bin width
 
     for (int i = 0; i < m; i++) {
         if (job_alloc_rounded.size() == i) {
@@ -239,27 +258,27 @@ double PTAS(std::vector<int> jobs, int m, double epsilon) {
         actual_job_alloc[index].push_back(t);
     }
 
-    for (int i = 0; i < m; i++) {
-        std::cout << "machine " << i << ": ";
-        for (auto j : actual_job_alloc[i]) {
-            std::cout << j << ' ';
-        }
-        std::cout << std::endl;
-    }
+    // for (int i = 0; i < m; i++) {
+    //     std::cout << "machine " << i << ": ";
+    //     for (auto j : actual_job_alloc[i]) {
+    //         std::cout << j << ' ';
+    //     }
+    //     std::cout << std::endl;
+    // }
 
-    std::cout << "makespans: ";
-    for (auto i : makespans) {
-        std::cout << i << ' ';
-    }
-    std::cout << std::endl;
+    // std::cout << "makespans: ";
+    // for (auto i : makespans) {
+    //     std::cout << i << ' ';
+    // }
+    // std::cout << std::endl;
 
     auto max_it = std::max_element(makespans.begin(), makespans.end());
     return max_it != makespans.end() ? *max_it : 0;
 }
 
-// int main(){
+// int main() {
 //     // optimal = 12, LPT gives 15
-//     std::vector<int> jobs{7,7,6,6,5,5,4,4,4};
+//     std::vector<int> jobs{31, 64, 99, 78, 90, 10, 4, 91};
 //     int makespan = PTAS(jobs, 4, 0.3);
 //     std::cout << "PTAS: " << makespan << std::endl;
 // }
